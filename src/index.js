@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
+import Calculator from './components/calculator/calculator';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    {/* <Switch /> */}
+    <Calculator />
   </React.StrictMode>,
   document.getElementById('root')
 );
