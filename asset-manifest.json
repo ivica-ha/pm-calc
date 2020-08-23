@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/pm-calc/static/css/main.5f361e03.chunk.css",
+    "main.js": "/pm-calc/static/js/main.457bdb3d.chunk.js",
+    "main.js.map": "/pm-calc/static/js/main.457bdb3d.chunk.js.map",
+    "runtime-main.js": "/pm-calc/static/js/runtime-main.17611498.js",
+    "runtime-main.js.map": "/pm-calc/static/js/runtime-main.17611498.js.map",
+    "static/js/2.d572290e.chunk.js": "/pm-calc/static/js/2.d572290e.chunk.js",
+    "static/js/2.d572290e.chunk.js.map": "/pm-calc/static/js/2.d572290e.chunk.js.map",
+    "index.html": "/pm-calc/index.html",
+    "precache-manifest.60d7216a297e34429cc1ca8be08c2a34.js": "/pm-calc/precache-manifest.60d7216a297e34429cc1ca8be08c2a34.js",
+    "service-worker.js": "/pm-calc/service-worker.js",
+    "static/css/main.5f361e03.chunk.css.map": "/pm-calc/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.d572290e.chunk.js.LICENSE.txt": "/pm-calc/static/js/2.d572290e.chunk.js.LICENSE.txt",
+    "static/media/logo.svg": "/pm-calc/static/media/logo.5d5d9eef.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.17611498.js",
+    "static/js/2.d572290e.chunk.js",
+    "static/css/main.5f361e03.chunk.css",
+    "static/js/main.457bdb3d.chunk.js"
+  ]
+}
