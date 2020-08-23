@@ -118,7 +118,7 @@ function Calculator() {
   useEffect(() =>
   {
     if(query.length) {
-      fetch(`http://api.mathjs.org/v4/?expr=${encodeURIComponent(query)}`)
+      fetch(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(query)}`)
       .then(res => res.json())
       .then(
         (result) => {
