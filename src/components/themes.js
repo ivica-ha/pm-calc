@@ -9,8 +9,11 @@ export const lightTheme = {
     calcOptionBtnCol: '#fff',
     calcNavBtnBg: 'transparent',
     calcNavBtnCol: '#333',
+    calcNumBtnBg: '#efefef',
+    calcNumBtnCol: '#333',
     calcExpressionCol: '#747474',
-    calcResultCol: '#bf0e34'
+    calcResultCol: '#bf0e34',
+    calcSwitchCol: 'gray'
 }
 export const darkTheme = {
     themeColor: '#333',
@@ -23,6 +26,10 @@ export const darkTheme = {
     calcOptionBtnCol: '#fff',
     calcNavBtnBg: 'transparent',
     calcNavBtnCol: '#808080',
-    calcExpressionCol: '#747474',
-    calcResultCol: '#bf0e34'
+    calcNumBtnBg: '#545454',
+    calcNumBtnCol: '#fff',
+    calcExpressionCol: '#e6e6e6',
+    calcResultCol: '#e6e6e6',
+    calcSwitchCol: 'gray'
+
 }

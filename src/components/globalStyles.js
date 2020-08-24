@@ -6,6 +6,11 @@ export const GlobalStyles = createGlobalStyle`
   }
   .calculator {
     background-color: ${({ theme }) => theme.calcBgColor};
+    .calculator--theme-switch {
+      img.active {
+        filter: drop-shadow(0px 0px 2px ${({ theme }) => theme.calcSwitchCol});
+      }
+    }
     .calculator--results {
       .expression {
         color: ${({ theme }) => theme.calcExpressionCol};
@@ -23,6 +28,8 @@ export const GlobalStyles = createGlobalStyle`
       }
     }
     .calculator--btn {
+      background-color: ${({ theme }) => theme.calcNumBtnBg};
+      color: ${({ theme }) => theme.calcNumBtnCol};
       &.nav {
         background-color: ${({ theme }) => theme.calcNavBtnBg};
         color: ${({ theme }) => theme.calcNavBtnCol};

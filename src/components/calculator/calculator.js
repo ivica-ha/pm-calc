@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ThemeProvider } from "styled-components";
-import { GlobalStyles } from "../../components/globalStyles";
-import { lightTheme, darkTheme } from "../../components/themes";
+import { GlobalStyles } from "../globalStyles";
+import { lightTheme, darkTheme } from "../themes";
 import "./calculator.css";
 import Light from "../../images/sun.svg";
 import Dark from "../../images/moon.svg";
@@ -15,6 +15,8 @@ function Calculator() {
   const inputRef = useRef();
 
   const operators = ["*", "-", "+", "/", "."];
+  const cursorStart = currentPosition[0];
+  const cursorEnd = currentPosition[1];
 
   const lightThemeToggle = () => {
     setTheme("light");
@@ -23,134 +25,30 @@ function Calculator() {
     setTheme("dark");
   };
 
-  const setPosition = (j) => {
-    if (j === "add") {
-      setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1]);
-    } else if (j === "del") {
-      setCurrentPosition([currentPosition[0] - 1, currentPosition[0] - 1]);
-    }
-    inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1]);
+  const setPosition = (startPos, endPos, startRange, endRange) => {
+    setCurrentPosition([startPos, endPos]);
+    inputRef.current.setSelectionRange(startRange, endRange);
   };
 
-  const renderNumberButton = (i) => {
-    return (
-      <Button
-        className={`d-flex calculator--btn ${i === 0 ? "zero" : ""}`}
-        value={i}
-        onClick={(value) => {
-          if (result) {
-            setResult("");
-            setExpression(value);
-          } else {
-            setExpression(
-              expression.substring(0, currentPosition[0]) +
-                value +
-                expression.substring(currentPosition[1])
-            );
-          }
-          setPosition("add");
-        }}
-      />
-    );
-  };
-  const renderFunctionalButton = (i) => {
-    return (
-      <Button
-        className="d-flex calculator--btn func"
-        value={i}
-        onClick={(value) => {
-          let leftSubs = expression.substring(
-            currentPosition[0] - 1,
-            currentPosition[0]
-          );
-          let rightSubs = expression.substring(
-            currentPosition[0],
-            currentPosition[0] + 1
-          );
-          if (result !== "") {
-            setResult("");
-            setExpression(value);
-          } else {
-            setExpression(
-              expression.substring(0, currentPosition[0]) +
-                value +
-                expression.substring(currentPosition[1])
-            );
-          }
-          if (leftSubs === "." || rightSubs === ".") {
-            return;
-          }
-          if (operators.includes(leftSubs) && value === ")") {
-            return;
-          }
-          if (operators.includes(rightSubs) && value === "(") {
-            return;
-          }
-
-          setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1]);
-          inputRef.current.setSelectionRange(
-            currentPosition[0],
-            currentPosition[1]
-          );
-        }}
-      />
-    );
-  };
-  const handleDeleteButton = (i) => {
-    return (
-      <Button
-        className="d-flex calculator--btn func"
-        value={i}
-        onClick={(value) => {
-          if (!currentPosition[0] && !currentPosition[1] && result === "") {
-            return;
-          }
-          if (expression.length === 1 || result !== "") {
-            setExpression("");
-            setResult("");
+  useEffect(() => {
+    if (query.length) {
+      fetch(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(query)}`)
+        .then((res) => res.json())
+        .then(
+          (result) => {
+            setResult(result);
             setCurrentPosition([0, 0]);
-          } else {
-            setExpression(
-              expression.substring(0, currentPosition[0] - 1) +
-                expression.substring(currentPosition[0])
-            );
-            setPosition("del");
+          },
+          (error) => {
+            setResult("error");
           }
-        }}
-      />
-    );
-  };
-  const renderOperatorButton = (i) => {
-    return (
-      <Button
-        className={`d-flex calculator--btn ${i === "." ? "dot" : "operator"}`}
-        value={i}
-        onClick={(value) => {
-            console.log(value)
-          setExpression(
-            expression.substring(0, currentPosition[0]) +
-              value +
-              expression.substring(currentPosition[1])
-          );
-          setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1]);
-          inputRef.current.setSelectionRange(
-            currentPosition[0],
-            currentPosition[1]
-          );
-        }}
-        disabled={isOperatorDisabled()}
-      />
-    );
-  };
+        );
+    }
+  }, [query]);
+
   const isOperatorDisabled = () => {
-    let leftSubs = expression.substring(
-      currentPosition[0] - 1,
-      currentPosition[0]
-    );
-    let rightSubs = expression.substring(
-      currentPosition[0],
-      currentPosition[0] + 1
-    );
+    let leftSubs = expression.substring(cursorStart - 1, cursorStart);
+    let rightSubs = expression.substring(cursorStart, cursorStart + 1);
 
     if (leftSubs === "." || rightSubs === ".") {
       return true;
@@ -170,37 +68,159 @@ function Calculator() {
     return false;
   };
 
-  const moveCursor = (i) => {
-    const start = currentPosition[0];
-    const end = currentPosition[1];
+  const isBracketDisabled = (value) => {
+    let leftSubs = expression.substring(cursorStart - 1, cursorStart);
+    let rightSubs = expression.substring(cursorStart, cursorStart + 1);
 
-    if (start === 0 && i === "<") {
+    if (leftSubs === "." || rightSubs === ".") {
+      return true;
+    }
+    if (operators.includes(leftSubs) && value === ")") {
+      return true;
+    }
+    if (operators.includes(rightSubs) && value === "(") {
+      return true;
+    }
+    return false;
+  };
+
+  const isEqualDisabled = () => {
+    let leftSubs = expression.substring(
+      expression.length - 1,
+      expression.length
+    );
+    return operators.includes(leftSubs) || leftSubs === "(" || leftSubs === ".";
+  };
+
+  const moveCursor = (i) => {
+    if (cursorStart === 0 && i === "<") {
       return;
     }
-    if (start === expression.length && i === ">") {
+    if (cursorStart === expression.length && i === ">") {
       return;
     }
 
     if (i === "<") {
-      if (start === end) {
-        inputRef.current.setSelectionRange(start - 1, start - 1);
-        setCurrentPosition([start - 1, start - 1]);
+      if (cursorStart === cursorEnd) {
+        setPosition(
+          cursorStart - 1,
+          cursorStart - 1,
+          cursorStart - 1,
+          cursorStart - 1
+        );
       } else {
-        inputRef.current.setSelectionRange(start, start);
-        setCurrentPosition([start, start]);
+        setPosition(cursorStart, cursorStart, cursorStart, cursorStart);
       }
     } else {
-      if (start === end) {
-        inputRef.current.setSelectionRange(start + 1, start + 1);
-        setCurrentPosition([start + 1, start + 1]);
+      if (cursorStart === cursorEnd) {
+        setPosition(
+          cursorStart + 1,
+          cursorStart + 1,
+          cursorStart + 1,
+          cursorStart + 1
+        );
       } else {
-        inputRef.current.setSelectionRange(end, end);
-        setCurrentPosition([end, end]);
+        setPosition(cursorEnd, cursorEnd, cursorEnd, cursorEnd);
       }
     }
-
     inputRef.current.focus();
   };
+
+  const renderNumberButton = (i) => {
+    return (
+      <Button
+        className={`d-flex calculator--btn ${i === 0 ? "zero" : ""}`}
+        value={i}
+        onClick={(value) => {
+          if (result) {
+            setResult("");
+            setExpression(value);
+          } else {
+            setExpression(
+              expression.substring(0, cursorStart) +
+                value +
+                expression.substring(cursorEnd)
+            );
+          }
+          setPosition(cursorStart + 1, cursorStart + 1, cursorStart, cursorEnd);
+        }}
+      />
+    );
+  };
+
+  const renderBracketsButton = (i) => {
+    return (
+      <Button
+        className="d-flex calculator--btn func"
+        value={i}
+        onClick={(value) => {
+          if (result !== "") {
+            setResult("");
+            setExpression(value);
+          } else {
+            setExpression(
+              expression.substring(0, cursorStart) +
+                value +
+                expression.substring(cursorEnd)
+            );
+          }
+
+          setPosition(cursorStart + 1, cursorStart + 1, cursorStart, cursorEnd);
+        }}
+        disabled={isBracketDisabled(i)}
+      />
+    );
+  };
+
+  const renderDeleteButton = (i) => {
+    return (
+      <Button
+        className="d-flex calculator--btn func"
+        value={i}
+        onClick={(value) => {
+          if (!cursorStart && !cursorEnd && result === "") {
+            return;
+          }
+          if (expression.length === 1 || result !== "") {
+            setExpression("");
+            setResult("");
+            setCurrentPosition([0, 0]);
+          } else {
+            setExpression(
+              expression.substring(0, cursorStart - 1) +
+                expression.substring(cursorStart)
+            );
+            setPosition(
+              cursorStart - 1,
+              cursorStart - 1,
+              cursorStart,
+              cursorEnd
+            );
+          }
+        }}
+      />
+    );
+  };
+
+  const renderOperatorButton = (i) => {
+    return (
+      <Button
+        className={`d-flex calculator--btn ${i === "." ? "dot" : "operator"}`}
+        value={i}
+        onClick={(value) => {
+          setExpression(
+            expression.substring(0, cursorStart) +
+              value +
+              expression.substring(cursorEnd)
+          );
+
+          setPosition(cursorStart + 1, cursorStart + 1, cursorStart, cursorEnd);
+        }}
+        disabled={isOperatorDisabled()}
+      />
+    );
+  };
+
   const renderNavButton = (i) => {
     return (
       <Button
@@ -213,43 +233,15 @@ function Calculator() {
     );
   };
 
-  useEffect(() => {
-    if (query.length) {
-      fetch(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(query)}`)
-        .then((res) => res.json())
-        .then(
-          (result) => {
-            setResult(result);
-            setCurrentPosition([0, 0]);
-          },
-          (error) => {
-            setResult("error");
-          }
-        );
-      // .then(setExpression(''))
-    }
-  }, [query]);
-
-  const rendeEqualButton = (i) => {
+  const renderEqualButton = (i) => {
     return (
       <Button
         className="d-flex calculator--btn equal"
         value={i}
         onClick={() => {
-          let leftSubsi = expression.substring(
-            expression.length - 1,
-            expression.length
-          );
-          if (
-            operators.includes(leftSubsi) ||
-            leftSubsi === "(" ||
-            leftSubsi === "."
-          ) {
-            return;
-          } else {
-            setQuery(expression);
-          }
+          setQuery(expression);
         }}
+        disabled={isEqualDisabled()}
       />
     );
   };
@@ -264,7 +256,7 @@ function Calculator() {
               <div className="calculator--theme-switch--light d-flex w-50 justify-content-center">
                 <span>
                   <img
-                    className={theme === 'light' ? 'active' : ''}
+                    className={theme === "light" ? "active" : ""}
                     onClick={lightThemeToggle}
                     src={Light}
                     alt="light switch"
@@ -274,10 +266,10 @@ function Calculator() {
               <div className="calculator--theme-switch--dark d-flex w-50 justify-content-center">
                 <span>
                   <img
-                       alt='dark switch'
-                       className={theme === 'dark' ? 'active' : ''}
-                       src={Dark}
-                       onClick={darkThemeToggle}
+                    alt="dark switch"
+                    className={theme === "dark" ? "active" : ""}
+                    src={Dark}
+                    onClick={darkThemeToggle}
                   />
                 </span>
               </div>
@@ -304,9 +296,9 @@ function Calculator() {
             </div>
             <div className="calculator--num">
               <div className="d-flex justify-content-between">
-                {handleDeleteButton("C")}
-                {renderFunctionalButton("(")}
-                {renderFunctionalButton(")")}
+                {renderDeleteButton("C")}
+                {renderBracketsButton("(")}
+                {renderBracketsButton(")")}
                 {renderOperatorButton("/")}
               </div>
               <div className="d-flex justify-content-between">
@@ -330,7 +322,7 @@ function Calculator() {
               <div className="d-flex justify-content-between">
                 {renderNumberButton(0)}
                 {renderOperatorButton(".")}
-                {rendeEqualButton("=")}
+                {renderEqualButton("=")}
               </div>
             </div>
           </section>
@@ -350,8 +342,7 @@ function Button(props) {
       }}
       disabled={props.disabled}
     >
-        {props.value}
-      {/*{props.value === '/' ? <span>&#247;</span> : props.value }*/}
+      {props.value === "/" ? "÷" : props.value}
     </button>
   );
 }

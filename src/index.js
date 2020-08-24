@@ -6,7 +6,6 @@ import Calculator from './components/calculator/calculator';
 
 ReactDOM.render(
   <React.StrictMode>
-    {/* <Switch /> */}
     <Calculator />
   </React.StrictMode>,
   document.getElementById('root')
