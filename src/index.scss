@@ -14,7 +14,6 @@ html, button {
 
 body {
     margin: 0;
-    background-color: #bf0e34;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -65,27 +64,5 @@ $container-width: 300px;
 .flex-column {
     flex-direction: column;
 }
-
-// colors
-    $theme-color: #bf0e34;
-    $calc-bg-color: #fff;
-    $cells-bg-color: #fff;
-    $display-bg-color: #fff;
-    $border-color: #fff;
-    $font-color: #212121;
-    $calc-func-btn-bg: #333;
-    $calc-func-btn-col: #fff;
-    $calc-option-btn-bg: #bf0e34;;
-    $calc-option-btn-col: #fff;
-
-
-    // $calc-bg-color: #fff;
-    // $cells-bg-color: #fff;
-    // $display-bg-color: #fff;
-    // $border-color: #fff;
-    // $font-color: #212121;
-    // $calc-option-btn-bg: #9b1750;
-    // $calc-option-btn-col: #fff;
-
 
 

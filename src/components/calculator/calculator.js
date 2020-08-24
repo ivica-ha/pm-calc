@@ -1,16 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
+import { ThemeProvider } from "styled-components";
+import { GlobalStyles } from "../../components/globalStyles";
+import { lightTheme, darkTheme } from "../../components/themes";
 import "./calculator.css";
-import Light from '../../images/sun.svg';
-import Dark from '../../images/moon.svg';
+import Light from "../../images/sun.svg";
+import Dark from "../../images/moon.svg";
 
 function Calculator() {
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState("");
   const [query, setQuery] = useState("");
   const [currentPosition, setCurrentPosition] = useState([0, 0]);
+  const [theme, setTheme] = useState("light");
   const inputRef = useRef();
 
   const operators = ["*", "-", "+", "/", "."];
+
+  const lightThemeToggle = () => {
+    setTheme("light");
+  };
+  const darkThemeToggle = () => {
+    setTheme("dark");
+  };
 
   const setPosition = (j) => {
     if (j === "add") {
@@ -112,9 +123,10 @@ function Calculator() {
   const renderOperatorButton = (i) => {
     return (
       <Button
-        className={`d-flex calculator--btn ${i === '.' ? "dot" : "operator"}`}
+        className={`d-flex calculator--btn ${i === "." ? "dot" : "operator"}`}
         value={i}
         onClick={(value) => {
+            console.log(value)
           setExpression(
             expression.substring(0, currentPosition[0]) +
               value +
@@ -243,70 +255,88 @@ function Calculator() {
   };
 
   return (
-    <div className="container">
-      <div className="toggle-container"></div>
-      <section className="calculator" id="calculator">
-          <div className="calculator--theme-switch d-flex flex-wrap">
+    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
+      <>
+        <GlobalStyles />
+        <div className="container">
+          <section className="calculator" id="calculator">
+            <div className="calculator--theme-switch d-flex flex-wrap">
               <div className="calculator--theme-switch--light d-flex w-50 justify-content-center">
-                  <span><img src={Light} alt="light switch" /></span>
+                <span>
+                  <img
+                    className={theme === 'light' ? 'active' : ''}
+                    onClick={lightThemeToggle}
+                    src={Light}
+                    alt="light switch"
+                  />
+                </span>
               </div>
               <div className="calculator--theme-switch--dark d-flex w-50 justify-content-center">
-                   <span><img src={Dark} alt="dark switch" /></span>
+                <span>
+                  <img
+                       alt='dark switch'
+                       className={theme === 'dark' ? 'active' : ''}
+                       src={Dark}
+                       onClick={darkThemeToggle}
+                  />
+                </span>
               </div>
-          </div>
-        <div className="calculator--display d-flex flex-wrap">
-          <div className="d-flex w-20 calculator--nav-btns flex-column">
-            {renderNavButton("<")}
-            {renderNavButton(">")}
-          </div>
-          <div className="calculator--results w-80 d-flex flex-wrap">
-            <input
-              className={"w-100 text-right expression"}
-              value={expression}
-              ref={inputRef}
-              onChange={(e) => setExpression(e.target.value)}
-            />
-            <input
-                className={"w-100 text-right result"}
-                value={result}
-                placeholder={'0'}
-                readOnly
+            </div>
+            <div className="calculator--display d-flex flex-wrap">
+              <div className="d-flex w-20 calculator--nav-btns flex-column">
+                {renderNavButton("<")}
+                {renderNavButton(">")}
+              </div>
+              <div className="calculator--results w-80 d-flex flex-wrap">
+                <input
+                  className={"w-100 text-right expression"}
+                  value={expression}
+                  ref={inputRef}
+                  onChange={(e) => setExpression(e.target.value)}
                 />
-          </div>
+                <input
+                  className={"w-100 text-right result"}
+                  value={result}
+                  placeholder={"0"}
+                  readOnly
+                />
+              </div>
+            </div>
+            <div className="calculator--num">
+              <div className="d-flex justify-content-between">
+                {handleDeleteButton("C")}
+                {renderFunctionalButton("(")}
+                {renderFunctionalButton(")")}
+                {renderOperatorButton("/")}
+              </div>
+              <div className="d-flex justify-content-between">
+                {renderNumberButton(7)}
+                {renderNumberButton(8)}
+                {renderNumberButton(9)}
+                {renderOperatorButton("*")}
+              </div>
+              <div className="d-flex justify-content-between">
+                {renderNumberButton(4)}
+                {renderNumberButton(5)}
+                {renderNumberButton(6)}
+                {renderOperatorButton("-")}
+              </div>
+              <div className="d-flex justify-content-between">
+                {renderNumberButton(1)}
+                {renderNumberButton(2)}
+                {renderNumberButton(3)}
+                {renderOperatorButton("+")}
+              </div>
+              <div className="d-flex justify-content-between">
+                {renderNumberButton(0)}
+                {renderOperatorButton(".")}
+                {rendeEqualButton("=")}
+              </div>
+            </div>
+          </section>
         </div>
-        <div className="calculator--num">
-          <div className="d-flex justify-content-between">
-            {handleDeleteButton("C")}
-            {renderFunctionalButton("(")}
-            {renderFunctionalButton(")")}
-            {renderOperatorButton("/")}
-          </div>
-          <div className="d-flex justify-content-between">
-            {renderNumberButton(7)}
-            {renderNumberButton(8)}
-            {renderNumberButton(9)}
-            {renderOperatorButton("*")}
-          </div>
-          <div className="d-flex justify-content-between">
-            {renderNumberButton(4)}
-            {renderNumberButton(5)}
-            {renderNumberButton(6)}
-            {renderOperatorButton("-")}
-          </div>
-          <div className="d-flex justify-content-between">
-            {renderNumberButton(1)}
-            {renderNumberButton(2)}
-            {renderNumberButton(3)}
-            {renderOperatorButton("+")}
-          </div>
-          <div className="d-flex justify-content-between">
-            {renderNumberButton(0)}
-            {renderOperatorButton(".")}
-            {rendeEqualButton("=")}
-          </div>
-        </div>
-      </section>
-    </div>
+      </>
+    </ThemeProvider>
   );
 }
 
@@ -320,7 +350,8 @@ function Button(props) {
       }}
       disabled={props.disabled}
     >
-      {props.value}
+        {props.value}
+      {/*{props.value === '/' ? <span>&#247;</span> : props.value }*/}
     </button>
   );
 }

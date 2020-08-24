@@ -1,22 +1,27 @@
 @import "../../index";
 
 .calculator {
-  background-color: $calc-bg-color;
   border-radius: 25px;
   padding: 20px;
   box-shadow: 4px 4px 9px rgba(0, 0, 0, 0.5);
+  .calculator--theme-switch {
+    img {
+      transition: .2s linear;
+      &.active {
+        filter: drop-shadow(0px 0px 2px gray);
+      }
+    }
+  }
   .calculator--results {
     input {
       border: none;
       outline: none;
     }
     .expression {
-      color: gray;
       font-size: .6em;
     }  
     .result {
       font-size: 2em;
-      color: $theme-color ;
       font-weight: 600;
       white-space: break-spaces;
       word-break: break-word;
@@ -32,7 +37,8 @@
     align-items: center;
     box-sizing: border-box;
     font-size: 1.5em;
-    border-bottom: 2px solid #e7e7e7;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
     padding-bottom: 15px;
     .cursor-position {
       animation: 1s infinite blink;
@@ -43,6 +49,7 @@
     border-radius: 50%;
     border: none;
     cursor: pointer;
+    font-size: 1em;
     height: 45px;
     width: 45px;
     justify-content: center;
@@ -52,9 +59,6 @@
     &:hover {
       box-shadow: none;
     }
-    &.nav {
-      background-color: transparent;
-    }
     &.zero {
       border-radius: 30px;
       justify-content: flex-start;
@@ -62,26 +66,11 @@
       width: 45%;
     }
     &.func {
-      background-color: $calc-func-btn-bg;
       color: #fff;
-      font-size: 1em;
-    }
-    &.operator, &.equal {
-      background-color: $calc-option-btn-bg;
-      color: $calc-option-btn-col;
     }
     &:disabled {
       opacity: .7;
   }
   
-  }
-}
-
-@keyframes blink {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
   }
 }
