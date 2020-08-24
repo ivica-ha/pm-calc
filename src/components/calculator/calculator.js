@@ -4,34 +4,6 @@ import './calculator.css';
 
 
 function Calculator() {
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {
-  //     error: null,
-  //     isLoaded: false,
-  //     items: []
-  //   };
-  // }
-
-  // const componentDidMount = i => {
-  //   fetch(`http://api.mathjs.org/v4/?${sum}`)
-  //     .then(res => res.json())
-  //     .then(
-  //       (result) => {
-  //         this.setState({
-  //           isLoaded: true,
-  //           items: result
-  //         });
-  //       },
-  //       (error) => {
-  //         this.setState({
-  //           isLoaded: true,
-  //           error
-  //         });
-  //       }
-  //     )
-  // }
-
 
   const [expression, setExpression] = useState('');
   const [result, setResult] = useState('');
@@ -41,34 +13,88 @@ function Calculator() {
 
   const operators = ['*', '-', '+', '/', '.'];
 
+  const setPosition = j => {
+    if(j === 'add') {
+      setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1])
+    } else if(j === 'del') {
+      setCurrentPosition([currentPosition[0] -1, currentPosition[0] - 1])
+    }
+    inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1])
+  }
+
   const renderNumberButton = i => {
     return <Button className={`d-flex calculator--btn ${i === 0 ? 'zero' : ''}`} 
     value={i}
     onClick={value => {
-      console.log('*',inputRef.current.selectionStart, inputRef.current.selectionEnd);
-      setExpression(
-      expression.substring(0, currentPosition[0]) + value +  expression.substring(currentPosition[1])
-      
-      )
-      setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1])
-
+      if(result) {
+        setResult('')
+        setExpression(value)
+      } else {
+        setExpression(
+          expression.substring(0, currentPosition[0]) + value +  expression.substring(currentPosition[1])
+          )
+      }
+      setPosition('add')
+      // setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1])
+      // inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1])
     }}
     />;
   }
   const renderFunctionalButton = i => {
     return <Button className='d-flex calculator--btn func' value={i}
             onClick={value => {
-              if( expression.substring(0, expression.length - 1) !== value ) {
-                setExpression(expression + value)
+              let leftSubs = expression.substring(currentPosition[0] -1, currentPosition[0])
+              let rightSubs = expression.substring(currentPosition[0], currentPosition[0] + 1 )
+              if(result !== '') {
+                setResult('')
+                setExpression(value)
+              } else {
+              setExpression(
+                expression.substring(0, currentPosition[0]) + value +  expression.substring(currentPosition[1])
+              )
               }
-              
+              if( (leftSubs === '.') || (rightSubs === '.') ) {
+                return
+              }
+              if( operators.includes(leftSubs) && value === ')' ) {
+                return
+              }
+              if( operators.includes(rightSubs) && value === '(' ) {
+                return
+              }
+
+              setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1])
+              inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1])
+
             }}
+
             />;
   }
   const handleDeleteButton = i => {
     return <Button className='d-flex calculator--btn func' value={i}
-            onClick={value => setExpression(expression.substring(0, expression.length - 1)
-              )}
+            onClick={value => {
+              if( ! currentPosition[0] && ! currentPosition[1] && result === '') {
+                return
+              }
+              if( expression.length === 1 || result !== '') {
+                setExpression('')
+                setResult('')
+                setCurrentPosition([0,0])
+
+              } else {
+                setExpression(
+                  expression.substring(0, currentPosition[0] -1) + expression.substring(currentPosition[0]) 
+                  )
+                  setPosition('del')
+                  // setCurrentPosition([currentPosition[0] -1, currentPosition[0] - 1])
+                  // inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1])
+                  
+              }
+
+              
+            }
+
+            }
            
             />;
   }
@@ -77,16 +103,51 @@ function Calculator() {
         className='d-flex calculator--btn func' 
         value={i}
         onClick={value => {
-          if( (! operators.includes(expression.slice(-1))) ) {
-            setExpression(expression + value)
-          }
+
+          setExpression(
+            expression.substring(0, currentPosition[0]) + value +  expression.substring(currentPosition[1])
+          )
+          setCurrentPosition([currentPosition[0] + 1, currentPosition[0] + 1])
+          inputRef.current.setSelectionRange(currentPosition[0], currentPosition[1])
+
         }}
-        disabled={!expression.length}
+        disabled={isOperatorDisabled()}
              />;
   }
+  const isOperatorDisabled = () => {
+
+    let leftSubs = expression.substring(currentPosition[0] -1, currentPosition[0])
+    let rightSubs = expression.substring(currentPosition[0], currentPosition[0] + 1 )
+
+    if( (leftSubs === '.') || (rightSubs === '.') ) {
+      return true
+    }
+
+    if( operators.includes(leftSubs) || operators.includes(rightSubs) ) {
+      return true
+    }
+
+    if( leftSubs === '(' || rightSubs === ')' ) {
+      return true
+    }
+
+    if(!expression.length || result !== '') {
+      return true
+    }
+    return false
+    
+  }
+
   const moveCursor = i => {
-    const start = inputRef.current.selectionStart;
-    const end = inputRef.current.selectionEnd;
+    const start = currentPosition[0];
+    const end = currentPosition[1];
+
+    if(start === 0 && i === '<') {
+      return
+    }
+    if(start === expression.length && i === '>') {
+      return
+    }
 
     if(i === '<') {
       if(start === end) {
@@ -111,7 +172,7 @@ function Calculator() {
   const rendeNavButton = i => {
 
     return <Button className='d-flex calculator--btn nav' value={i}
-    onClick={ () => moveCursor(i) }
+    onClick={ () => {moveCursor(i)} }
              />;
   }
 
@@ -123,17 +184,29 @@ function Calculator() {
       .then(
         (result) => {
           setResult(result)
+          setCurrentPosition([0,0])
         },
         (error) => {
-          console.log(6*(2+4));
+          setResult('error')
         }
       )
+      // .then(setExpression(''))
     }
   }, [query]);
 
   const rendeEqualButton = i => {
     return <Button className='d-flex calculator--btn equal' value={i}
-            onClick={() => setQuery(expression)}
+            onClick={() => 
+              {
+                let leftSubsi = expression.substring(expression.length -1, expression.length )
+                if( operators.includes(leftSubsi) || leftSubsi === '(' || leftSubsi === '.' ) {
+                  return
+                } else {
+                  setQuery(expression)}
+                }
+                
+              }
+              
              />;
   }
 
@@ -147,19 +220,6 @@ function Calculator() {
         <div className="calculator--display">
         {rendeNavButton('<')}
         {rendeNavButton('>')}
-          {/* <input 
-          value="text"
-          autoFocus
-          ref={inputRef}
-          // onClick={ () => inputRef.current.setSelectionRange(2,2)}
-          />
-           <button 
-           onClick={ () => {
-            console.log('bla', inputRef)
-            inputRef.current.setSelectionRange(2,2)
-            inputRef.current.focus()} }
-           value="bok"
-           /> */}
           <input
           value={expression}
           ref={inputRef}
